@@ -3,7 +3,6 @@ using System.Data;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Navigation;
 using Npgsql;
 
 namespace ExecuteSqlREquest
