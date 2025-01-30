@@ -1,6 +1,7 @@
 using System;
 using System.Data;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Npgsql;
@@ -16,12 +17,17 @@ namespace ExecuteSqlREquest
     private const string ConnectionIdFile = "connectionId.txt";
     private const string WindowSettingsFile = "windowSettings.txt";
     private const string QueryContentFile = "lastQuery.txt";
+    private const int PageSize = 200;
+    private DataTable _fullResultSet;
+    private int _currentPage = 1;
+    private int _totalPages = 1;
     private PleaseWaitWindow _pleaseWaitWindow;
 
     public MainWindow()
     {
       InitializeComponent();
       LoadConnexionId();
+      UpdatePaginationControls();
     }
 
     private void LoadConnexionId()
@@ -47,6 +53,53 @@ namespace ExecuteSqlREquest
       {
         MessageBox.Show($"Erreur lors de la tentative d'écriture d'un fichier sur le disque.\nL'erreur est {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
         throw;
+      }
+    }
+
+    private void UpdatePaginationControls()
+    {
+      PreviousButton.IsEnabled = _currentPage > 1;
+      NextButton.IsEnabled = _currentPage < _totalPages;
+      CurrentPageText.Text = _currentPage.ToString();
+      TotalPagesText.Text = _totalPages.ToString();
+      PaginationText.Visibility = _totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
+      PreviousButton.Visibility = _totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
+      NextButton.Visibility = _totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
+    private void DisplayCurrentPage()
+    {
+      if (_fullResultSet == null || _fullResultSet.Rows.Count == 0)
+      {
+        ResultDataGrid.ItemsSource = null;
+        return;
+      }
+
+      var pageRows = _fullResultSet.AsEnumerable()
+          .Skip((_currentPage - 1) * PageSize)
+          .Take(PageSize)
+          .CopyToDataTable();
+
+      ResultDataGrid.ItemsSource = pageRows.DefaultView;
+    }
+
+    private void NextButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (_currentPage < _totalPages)
+      {
+        _currentPage++;
+        DisplayCurrentPage();
+        UpdatePaginationControls();
+      }
+    }
+
+    private void PreviousButton_Click(object sender, RoutedEventArgs e)
+    {
+      if (_currentPage > 1)
+      {
+        _currentPage--;
+        DisplayCurrentPage();
+        UpdatePaginationControls();
       }
     }
 
@@ -81,7 +134,7 @@ namespace ExecuteSqlREquest
       catch (Exception exception)
       {
         // En cas d'erreur, on utilise les dimensions par défaut
-        MessageBox.Show($"Erreur lors du chargement des paramètres de la fenêtre : {exception.Message}", 
+        MessageBox.Show($"Erreur lors du chargement des paramètres de la fenêtre : {exception.Message}",
                        "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
       }
     }
@@ -101,7 +154,7 @@ namespace ExecuteSqlREquest
       }
       catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {exception.Message}", 
+        MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {exception.Message}",
                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
@@ -117,7 +170,7 @@ namespace ExecuteSqlREquest
       }
       catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors du chargement de la dernière requête : {exception.Message}", 
+        MessageBox.Show($"Erreur lors du chargement de la dernière requête : {exception.Message}",
                        "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
       }
     }
@@ -130,7 +183,7 @@ namespace ExecuteSqlREquest
       }
       catch (Exception ex)
       {
-        MessageBox.Show($"Erreur lors de la sauvegarde de la requête : {ex.Message}", 
+        MessageBox.Show($"Erreur lors de la sauvegarde de la requête : {ex.Message}",
                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
@@ -186,38 +239,37 @@ namespace ExecuteSqlREquest
       }
     }
 
-    private Task ExecuteQueryAsync(string query)
+    private async Task ExecuteQueryAsync(string query)
     {
-      return Task.Run(() =>
+      try
       {
-        using (var conn = new NpgsqlConnection(ConnectionString))
+        using (var connection = new NpgsqlConnection(ConnectionString))
         {
-          conn.Open();
-
-          using (var cmd = new NpgsqlCommand(query, conn))
+          await connection.OpenAsync();
+          using (var command = new NpgsqlCommand(query, connection))
           {
-            if (query.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+            using (var adapter = new NpgsqlDataAdapter(command))
             {
-              var dataAdapter = new NpgsqlDataAdapter(cmd);
-              var dataTable = new DataTable();
-              dataAdapter.Fill(dataTable);
+              _fullResultSet = new DataTable();
+              adapter.Fill(_fullResultSet);
 
-              Dispatcher.Invoke(() =>
-              {
-                ResultDataGrid.ItemsSource = dataTable.DefaultView;
-              });
-            }
-            else
-            {
-              int affectedRows = cmd.ExecuteNonQuery();
-              Dispatcher.Invoke(() =>
-              {
-                MessageBox.Show($"{affectedRows} ligne(s) affectée(s).", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
-              });
+              _currentPage = 1;
+              _totalPages = (_fullResultSet.Rows.Count + PageSize - 1) / PageSize;
+
+              DisplayCurrentPage();
+              UpdatePaginationControls();
             }
           }
         }
-      });
+      }
+      catch
+      {
+        _fullResultSet = null;
+        _currentPage = 1;
+        _totalPages = 1;
+        UpdatePaginationControls();
+        throw;
+      }
     }
   }
 }
