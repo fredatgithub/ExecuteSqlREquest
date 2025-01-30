@@ -18,10 +18,10 @@ namespace ExecuteSqlREquest
     public MainWindow()
     {
       InitializeComponent();
-      LoadCompletedEventHandler();
+      LoadConnexionId();
     }
 
-    private void LoadCompletedEventHandler()
+    private void LoadConnexionId()
     {
       // load the connection string from the file connectionId.txt
       if (!File.Exists(ConnectionIdFile))
