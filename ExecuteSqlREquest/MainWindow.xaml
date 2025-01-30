@@ -33,7 +33,16 @@
                   HorizontalAlignment="Stretch"
                   MinHeight="100"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
-                  IsReadOnly="True"/>
+                  IsReadOnly="True">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#2196F3"/>
+                    <Setter Property="Foreground" Value="White"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="Padding" Value="10,5"/>
+                </Style>
+            </DataGrid.Resources>
+        </DataGrid>
         
         <Border x:Name="PaginationBorder" 
                 Grid.Row="1" 
