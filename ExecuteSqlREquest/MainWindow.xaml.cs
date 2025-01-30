@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.IO;
 using System.Threading.Tasks;
@@ -14,6 +14,7 @@ namespace ExecuteSqlREquest
   {
     private string ConnectionString = "Host=localhost;Port=5432;Username=postgres;Password=your_password;Database=your_database";
     private const string ConnectionIdFile = "connectionId.txt";
+    private const string WindowSettingsFile = "windowSettings.txt";
 
     public MainWindow()
     {
@@ -31,6 +32,60 @@ namespace ExecuteSqlREquest
       }
 
       ConnectionString = File.ReadAllText("connectionId.txt");
+    }
+
+    private void Window_SourceInitialized(object sender, EventArgs e)
+    {
+      LoadWindowSettings();
+    }
+
+    private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+    {
+      SaveWindowSettings();
+    }
+
+    private void LoadWindowSettings()
+    {
+      try
+      {
+        if (File.Exists(WindowSettingsFile))
+        {
+          string[] settings = File.ReadAllLines(WindowSettingsFile);
+          if (settings.Length >= 4)
+          {
+            this.Left = double.Parse(settings[0]);
+            this.Top = double.Parse(settings[1]);
+            this.Width = double.Parse(settings[2]);
+            this.Height = double.Parse(settings[3]);
+          }
+        }
+      }
+      catch (Exception ex)
+      {
+        // En cas d'erreur, on utilise les dimensions par défaut
+        MessageBox.Show($"Erreur lors du chargement des paramètres de la fenêtre : {ex.Message}", 
+                       "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
+      }
+    }
+
+    private void SaveWindowSettings()
+    {
+      try
+      {
+        string[] settings = new string[]
+        {
+          this.Left.ToString(),
+          this.Top.ToString(),
+          this.Width.ToString(),
+          this.Height.ToString()
+        };
+        File.WriteAllLines(WindowSettingsFile, settings);
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {ex.Message}", 
+                       "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+      }
     }
 
     private async void ExecuteQuery_Click(object sender, RoutedEventArgs e)
