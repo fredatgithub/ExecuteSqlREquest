@@ -16,6 +16,7 @@ namespace ExecuteSqlREquest
     private const string ConnectionIdFile = "connectionId.txt";
     private const string WindowSettingsFile = "windowSettings.txt";
     private const string QueryContentFile = "lastQuery.txt";
+    private PleaseWaitWindow _pleaseWaitWindow;
 
     public MainWindow()
     {
@@ -140,7 +141,9 @@ namespace ExecuteSqlREquest
         query += " LIMIT 200;";
       }
 
-      QueryProgressBar.Visibility = Visibility.Visible;
+      _pleaseWaitWindow = new PleaseWaitWindow { Owner = this };
+      _pleaseWaitWindow.Show();
+      ExecuteButton.IsEnabled = false;
 
       try
       {
@@ -160,7 +163,12 @@ namespace ExecuteSqlREquest
       }
       finally
       {
-        QueryProgressBar.Visibility = Visibility.Collapsed;
+        if (_pleaseWaitWindow != null)
+        {
+          _pleaseWaitWindow.Close();
+          _pleaseWaitWindow = null;
+        }
+        ExecuteButton.IsEnabled = true;
       }
     }
 

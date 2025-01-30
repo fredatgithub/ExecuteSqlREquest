@@ -1,0 +1,24 @@
+<Window x:Class="ExecuteSqlREquest.PleaseWaitWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:ExecuteSqlREquest"
+        mc:Ignorable="d"
+        Title="Exécution en cours" Height="150" Width="300"
+        WindowStyle="None" 
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#F0F0F0">
+    <Grid>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+            <TextBlock Text="Exécution de la requête en cours..." 
+                     HorizontalAlignment="Center" 
+                     Margin="0,0,0,20"
+                     FontSize="14"/>
+            <ProgressBar IsIndeterminate="True" 
+                       Height="2" 
+                       Width="200"/>
+        </StackPanel>
+    </Grid>
+</Window>
