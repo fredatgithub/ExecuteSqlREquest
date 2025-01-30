@@ -32,7 +32,6 @@ namespace ExecuteSqlREquest
 
     private void LoadConnexionId()
     {
-      // load the connection string from the file connectionId.txt
       if (!File.Exists(ConnectionIdFile))
       {
         MessageBox.Show("Fichier de connexion introuvable.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -40,6 +39,7 @@ namespace ExecuteSqlREquest
         return;
       }
 
+      // load the connection string from the file connectionId.txt
       ConnectionString = File.ReadAllText("connectionId.txt");
     }
 
@@ -149,9 +149,7 @@ namespace ExecuteSqlREquest
       }
       catch (Exception exception)
       {
-        // En cas d'erreur, on utilise les dimensions par défaut
-        MessageBox.Show($"Erreur lors du chargement des paramètres de la fenêtre : {exception.Message}",
-                       "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
+        MessageBox.Show($"Erreur lors du chargement des paramètres de la fenêtre : {exception.Message}", "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
       }
     }
 
@@ -166,12 +164,12 @@ namespace ExecuteSqlREquest
           Width.ToString(),
           Height.ToString()
         };
+
         File.WriteAllLines(WindowSettingsFile, settings);
       }
       catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {exception.Message}",
-                       "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
 
@@ -197,9 +195,9 @@ namespace ExecuteSqlREquest
       {
         File.WriteAllText(QueryContentFile, QueryTextBox.Text);
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors de la sauvegarde de la requête : {ex.Message}",
+        MessageBox.Show($"Erreur lors de la sauvegarde de la requête : {exception.Message}",
                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
