@@ -30,10 +30,24 @@ namespace ExecuteSqlREquest
       if (!File.Exists(ConnectionIdFile))
       {
         MessageBox.Show("Fichier de connexion introuvable.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        CreateConnectionFile();
         return;
       }
 
       ConnectionString = File.ReadAllText("connectionId.txt");
+    }
+
+    private void CreateConnectionFile()
+    {
+      try
+      {
+        File.WriteAllText(ConnectionIdFile, ConnectionString);
+      }
+      catch (Exception exception)
+      {
+        MessageBox.Show($"Erreur lors de la tentative d'écriture d'un fichier sur le disque.\nL'erreur est {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        throw;
+      }
     }
 
     private void Window_SourceInitialized(object sender, EventArgs e)
