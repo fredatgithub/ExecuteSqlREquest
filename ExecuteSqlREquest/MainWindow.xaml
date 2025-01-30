@@ -36,9 +36,11 @@
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   IsReadOnly="True"/>
         
-        <Border Grid.Row="1" 
+        <Border x:Name="PaginationBorder" 
+                Grid.Row="1" 
                 Background="{DynamicResource {x:Static SystemColors.ControlBrushKey}}"
-                Padding="0,10">
+                Padding="0,10"
+                Visibility="Collapsed">
             <StackPanel Orientation="Horizontal" 
                         HorizontalAlignment="Center">
                 <Button x:Name="PreviousButton" 

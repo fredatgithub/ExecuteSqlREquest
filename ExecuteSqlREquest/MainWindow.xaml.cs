@@ -58,13 +58,23 @@ namespace ExecuteSqlREquest
 
     private void UpdatePaginationControls()
     {
+      if (_fullResultSet == null)
+      {
+        PaginationBorder.Visibility = Visibility.Collapsed;
+        return;
+      }
+
+      if (_fullResultSet.Rows.Count <= PageSize)
+      {
+        PaginationBorder.Visibility = Visibility.Collapsed;
+        return;
+      }
+
+      PaginationBorder.Visibility = Visibility.Visible;
       PreviousButton.IsEnabled = _currentPage > 1;
       NextButton.IsEnabled = _currentPage < _totalPages;
       CurrentPageText.Text = _currentPage.ToString();
       TotalPagesText.Text = _totalPages.ToString();
-      PaginationText.Visibility = _totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
-      PreviousButton.Visibility = _totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
-      NextButton.Visibility = _totalPages > 1 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void DisplayCurrentPage()
@@ -77,10 +87,16 @@ namespace ExecuteSqlREquest
 
       var pageRows = _fullResultSet.AsEnumerable()
           .Skip((_currentPage - 1) * PageSize)
-          .Take(PageSize)
-          .CopyToDataTable();
+          .Take(PageSize);
 
-      ResultDataGrid.ItemsSource = pageRows.DefaultView;
+      // Créer une nouvelle DataTable pour la page courante
+      DataTable pageTable = _fullResultSet.Clone();
+      foreach (var row in pageRows)
+      {
+        pageTable.ImportRow(row);
+      }
+
+      ResultDataGrid.ItemsSource = pageTable.DefaultView;
     }
 
     private void NextButton_Click(object sender, RoutedEventArgs e)
@@ -198,16 +214,6 @@ namespace ExecuteSqlREquest
         return;
       }
 
-      if (query.StartsWith("SELECT *", StringComparison.OrdinalIgnoreCase))
-      {
-        if (query.EndsWith(";"))
-        {
-          query = query.TrimEnd(';');
-        }
-
-        query += " LIMIT 200;";
-      }
-
       _pleaseWaitWindow = new PleaseWaitWindow { Owner = this };
       _pleaseWaitWindow.Show();
       ExecuteButton.IsEnabled = false;
@@ -246,6 +252,18 @@ namespace ExecuteSqlREquest
         using (var connection = new NpgsqlConnection(ConnectionString))
         {
           await connection.OpenAsync();
+          
+          // Si ce n'est pas une requête SELECT, exécuter directement
+          if (!query.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase))
+          {
+            using (var command = new NpgsqlCommand(query, connection))
+            {
+              int affectedRows = await command.ExecuteNonQueryAsync();
+              MessageBox.Show($"{affectedRows} ligne(s) affectée(s).", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+              return;
+            }
+          }
+
           using (var command = new NpgsqlCommand(query, connection))
           {
             using (var adapter = new NpgsqlDataAdapter(command))
@@ -256,8 +274,12 @@ namespace ExecuteSqlREquest
               _currentPage = 1;
               _totalPages = (_fullResultSet.Rows.Count + PageSize - 1) / PageSize;
 
-              DisplayCurrentPage();
-              UpdatePaginationControls();
+              // S'assurer que ces opérations sont exécutées sur le thread UI
+              await Dispatcher.InvokeAsync(() =>
+              {
+                DisplayCurrentPage();
+                UpdatePaginationControls();
+              });
             }
           }
         }
@@ -267,7 +289,11 @@ namespace ExecuteSqlREquest
         _fullResultSet = null;
         _currentPage = 1;
         _totalPages = 1;
-        UpdatePaginationControls();
+        await Dispatcher.InvokeAsync(() =>
+        {
+          UpdatePaginationControls();
+          ResultDataGrid.ItemsSource = null;
+        });
         throw;
       }
     }
