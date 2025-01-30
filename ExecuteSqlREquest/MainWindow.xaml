@@ -15,7 +15,7 @@
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
 
-    <TextBox x:Name="QueryTextBox" AcceptsReturn="True" 
+    <TextBox x:Name="QueryTextBox" AcceptsReturn="True" TextElement.FontSize="18"
              VerticalScrollBarVisibility="Auto" TextWrapping="Wrap" Margin="0,2,0,11"/>
 
     <Button Name="ExecuteButton" Grid.Row="1" Content="Exécuter la requête" 
@@ -32,7 +32,6 @@
                   VerticalAlignment="Stretch" 
                   HorizontalAlignment="Stretch"
                   MinHeight="100"
-                  MaxHeight="400"
                   ScrollViewer.VerticalScrollBarVisibility="Auto"
                   IsReadOnly="True"/>
         
