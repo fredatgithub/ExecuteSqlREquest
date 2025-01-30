@@ -214,6 +214,13 @@ namespace ExecuteSqlREquest
         return;
       }
 
+      // on exécute pas les requêtes qui contiennent DROP
+      if (query.ToUpper().Contains("DROP"))
+      {
+        MessageBox.Show("Les requêtes DROP ne sont pas autorisées.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        return;
+      }
+
       _pleaseWaitWindow = new PleaseWaitWindow { Owner = this };
       _pleaseWaitWindow.Show();
       ExecuteButton.IsEnabled = false;
