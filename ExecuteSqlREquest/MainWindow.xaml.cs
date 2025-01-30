@@ -132,7 +132,12 @@ namespace ExecuteSqlREquest
 
       if (query.StartsWith("SELECT *", StringComparison.OrdinalIgnoreCase))
       {
-        query += " LIMIT 200";
+        if (query.EndsWith(";"))
+        {
+          query = query.TrimEnd(';');
+        }
+
+        query += " LIMIT 200;";
       }
 
       QueryProgressBar.Visibility = Visibility.Visible;
