@@ -15,6 +15,7 @@ namespace ExecuteSqlREquest
     private string ConnectionString = "Host=localhost;Port=5432;Username=postgres;Password=your_password;Database=your_database";
     private const string ConnectionIdFile = "connectionId.txt";
     private const string WindowSettingsFile = "windowSettings.txt";
+    private const string QueryContentFile = "lastQuery.txt";
 
     public MainWindow()
     {
@@ -37,11 +38,13 @@ namespace ExecuteSqlREquest
     private void Window_SourceInitialized(object sender, EventArgs e)
     {
       LoadWindowSettings();
+      LoadQueryContent();
     }
 
     private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
     {
       SaveWindowSettings();
+      SaveQueryContent();
     }
 
     private void LoadWindowSettings()
@@ -84,6 +87,35 @@ namespace ExecuteSqlREquest
       catch (Exception ex)
       {
         MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {ex.Message}", 
+                       "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+      }
+    }
+
+    private void LoadQueryContent()
+    {
+      try
+      {
+        if (File.Exists(QueryContentFile))
+        {
+          QueryTextBox.Text = File.ReadAllText(QueryContentFile);
+        }
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Erreur lors du chargement de la dernière requête : {ex.Message}", 
+                       "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
+      }
+    }
+
+    private void SaveQueryContent()
+    {
+      try
+      {
+        File.WriteAllText(QueryContentFile, QueryTextBox.Text);
+      }
+      catch (Exception ex)
+      {
+        MessageBox.Show($"Erreur lors de la sauvegarde de la requête : {ex.Message}", 
                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
