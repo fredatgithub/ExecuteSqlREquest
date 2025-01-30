@@ -10,7 +10,7 @@
         SourceInitialized="Window_SourceInitialized">
   <Grid Margin="10">
     <Grid.RowDefinitions>
-      <RowDefinition Height="Auto" MinHeight="330" />
+      <RowDefinition Height="Auto" MinHeight="150" />
       <RowDefinition Height="Auto"/>
       <RowDefinition Height="*" />
     </Grid.RowDefinitions>
