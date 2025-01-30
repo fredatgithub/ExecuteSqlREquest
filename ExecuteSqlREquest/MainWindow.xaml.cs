@@ -56,17 +56,17 @@ namespace ExecuteSqlREquest
           string[] settings = File.ReadAllLines(WindowSettingsFile);
           if (settings.Length >= 4)
           {
-            this.Left = double.Parse(settings[0]);
-            this.Top = double.Parse(settings[1]);
-            this.Width = double.Parse(settings[2]);
-            this.Height = double.Parse(settings[3]);
+            Left = double.Parse(settings[0]);
+            Top = double.Parse(settings[1]);
+            Width = double.Parse(settings[2]);
+            Height = double.Parse(settings[3]);
           }
         }
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
         // En cas d'erreur, on utilise les dimensions par défaut
-        MessageBox.Show($"Erreur lors du chargement des paramètres de la fenêtre : {ex.Message}", 
+        MessageBox.Show($"Erreur lors du chargement des paramètres de la fenêtre : {exception.Message}", 
                        "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
       }
     }
@@ -77,16 +77,16 @@ namespace ExecuteSqlREquest
       {
         string[] settings = new string[]
         {
-          this.Left.ToString(),
-          this.Top.ToString(),
-          this.Width.ToString(),
-          this.Height.ToString()
+          Left.ToString(),
+          Top.ToString(),
+          Width.ToString(),
+          Height.ToString()
         };
         File.WriteAllLines(WindowSettingsFile, settings);
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {ex.Message}", 
+        MessageBox.Show($"Erreur lors de la sauvegarde des paramètres de la fenêtre : {exception.Message}", 
                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
     }
@@ -100,9 +100,9 @@ namespace ExecuteSqlREquest
           QueryTextBox.Text = File.ReadAllText(QueryContentFile);
         }
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur lors du chargement de la dernière requête : {ex.Message}", 
+        MessageBox.Show($"Erreur lors du chargement de la dernière requête : {exception.Message}", 
                        "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
       }
     }
@@ -146,17 +146,17 @@ namespace ExecuteSqlREquest
       {
         await ExecuteQueryAsync(query);
       }
-      catch (NpgsqlException ex) when (ex.Message.Contains("password"))
+      catch (NpgsqlException exception) when (exception.Message.Contains("password"))
       {
         MessageBox.Show("Erreur de connexion : mot de passe invalide.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
-      catch (NpgsqlException ex)
+      catch (NpgsqlException exception)
       {
-        MessageBox.Show($"Erreur SQL : {ex.Message}", "Erreur SQL", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"Erreur SQL : {exception.Message}", "Erreur SQL", MessageBoxButton.OK, MessageBoxImage.Error);
       }
-      catch (Exception ex)
+      catch (Exception exception)
       {
-        MessageBox.Show($"Erreur inconnue : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+        MessageBox.Show($"Erreur inconnue : {exception.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
       }
       finally
       {
